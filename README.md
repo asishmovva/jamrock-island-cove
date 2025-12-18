@@ -9,6 +9,9 @@ pnpm install
 pnpm dev
 ```
 
+- App Router lives in `src/app`, shared components in `src/components`, utilities in `src/lib`.
+- Placeholder routes: `/`, `/menu`, `/login`, `/admin` (to be wired in later PRs).
+
 ### Quality gates
 
 - `pnpm lint` - Next.js linting (ESLint flat config)
