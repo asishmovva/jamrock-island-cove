@@ -40,16 +40,19 @@ const highlights = [
 export default function Home() {
   return (
     <div className="space-y-16 pb-16">
-      <section className="border-b border-border/60 bg-gradient-to-br from-primary/5 via-background to-secondary/10">
-        <div className="container grid gap-10 py-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+      <section className="relative overflow-hidden border-b border-primary/10 bg-gradient-to-br from-primary/12 via-background to-secondary/15">
+        <div className="container grid gap-10 py-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div className="space-y-6">
-            <Badge variant="accent">Now serving Kingston-inspired bites</Badge>
-            <div className="space-y-4">
-              <h1 className="text-4xl font-bold leading-tight sm:text-5xl">JamRock Island Cove</h1>
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+              Jamaican crafted · Fresh daily
+            </div>
+            <div className="space-y-3">
+              <h1 className="text-4xl font-bold leading-tight text-foreground sm:text-5xl">
+                JamRock Island Cove
+              </h1>
               <p className="max-w-2xl text-lg text-muted-foreground">
-                Clean, modern Jamaican flavors made for busy days. Choose pickup or let us deliver
-                within 5 miles - either way your meal is cooked to order and packed with island
-                brightness.
+                Clean, modern island flavors powered by green, gold, and black. Pickup or delivery
+                within 5 miles - every bowl is cooked to order with bright herbs and citrus.
               </p>
             </div>
             <div className="flex flex-wrap gap-3" id="order">
@@ -65,7 +68,7 @@ export default function Home() {
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               {highlights.map((item) => (
-                <Card key={item.title} className="border-border/80">
+                <Card key={item.title} className="border-primary/10 bg-card/90">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">{item.title}</CardTitle>
                   </CardHeader>
@@ -77,7 +80,7 @@ export default function Home() {
             </div>
           </div>
 
-          <Card className="border-primary/15 bg-card/70 shadow-lg backdrop-blur">
+          <Card className="border-primary/15 bg-gradient-to-br from-card via-card to-primary/5 shadow-lg backdrop-blur">
             <CardHeader className="space-y-2">
               <Badge variant="secondary" className="w-fit">
                 Fresh today
