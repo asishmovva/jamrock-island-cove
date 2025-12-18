@@ -10,7 +10,7 @@ pnpm dev
 ```
 
 - App Router lives in `src/app`, shared components in `src/components`, utilities in `src/lib`.
-- Placeholder routes: `/`, `/menu`, `/login`, `/admin` (to be wired in later PRs).
+- Placeholder routes: `/`, `/menu`, `/login`, `/signup`, `/admin` (to be wired in later PRs).
 
 ### Quality gates
 
@@ -22,6 +22,7 @@ pnpm dev
 ### Environment
 
 Copy `.env.example` to `.env.local` and fill Supabase, Stripe, Mapbox, and Resend values before running auth, database, or payments flows.
+- Supabase Auth reads `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; user roles live in Supabase `app_metadata.role` (defaults to `customer`, set to `admin` manually for admin access).
 
 ### Conventions
 

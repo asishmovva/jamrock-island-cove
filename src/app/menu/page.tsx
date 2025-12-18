@@ -17,7 +17,7 @@ export default function MenuPage() {
           <CardTitle className="text-lg">Coming soon</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
-          <p>Expect filters by category, “popular” badges, and smart upsell hooks for drinks and desserts.</p>
+          <p>Expect filters by category, popular badges, and smart upsell hooks for drinks and desserts.</p>
           <p>Pricing will use deterministic utilities to keep totals accurate across cart and checkout.</p>
         </CardContent>
       </Card>
