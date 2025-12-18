@@ -15,14 +15,14 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-2">
           <nav className="hidden items-center gap-4 text-sm font-medium text-muted-foreground sm:flex">
-            <Link className="transition hover:text-foreground" href="#popular">
-              Popular
+            <Link className="transition hover:text-foreground" href="/menu">
+              Menu
+            </Link>
+            <Link className="transition hover:text-foreground" href="/login">
+              Login
             </Link>
             <Link className="transition hover:text-foreground" href="#about">
               About
-            </Link>
-            <Link className="transition hover:text-foreground" href="#contact">
-              Contact
             </Link>
           </nav>
           <Button size="sm" asChild>
