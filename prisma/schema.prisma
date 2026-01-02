@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum MenuItemType {
+  MAIN
+  SIDE
+  DRINK
+  DESSERT
+}
+
+enum FulfillmentType {
+  PICKUP
+  DELIVERY
+}
+
+enum OrderStatus {
+  NEW
+  ACCEPTED
+  READY
+  OUT_FOR_DELIVERY
+  COMPLETED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CARD
+  PAY_AT_PICKUP
+}
+
+model User {
+  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String       @unique
+  role      UserRole     @default(CUSTOMER)
+  name      String?
+  phone     String?
+  addresses SavedAddress[]
+  orders    Order[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model SavedAddress {
+  id        String   @id @default(cuid())
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String?
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  zip       String
+  lat       Float?
+  lng       Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model MenuItem {
+  id             String        @id @default(cuid())
+  name           String
+  description    String?
+  type           MenuItemType  @default(MAIN)
+  basePriceCents Int
+  imageUrl       String?
+  isActive       Boolean       @default(true)
+  stockQty       Int?
+  isPopular      Boolean       @default(false)
+  isFeatured     Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  orderItems     OrderItem[]
+}
+
+model Order {
+  id                    String           @id @default(cuid())
+  userId                String?          @db.Uuid
+  user                  User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  status                OrderStatus      @default(NEW)
+  fulfillmentType       FulfillmentType
+  customerName          String
+  customerEmail         String
+  customerPhone         String?
+  subtotalCents         Int
+  taxCents              Int              @default(0)
+  deliveryFeeCents      Int              @default(0)
+  tipCents              Int              @default(0)
+  totalCents            Int
+  currency              String           @default("USD")
+  paymentMethod         PaymentMethod
+  paymentStatus         PaymentStatus    @default(UNPAID)
+  paidAt                DateTime?
+  stripePaymentIntentId String?
+  lastPaymentEventType  String?
+  lastPaymentEventAt    DateTime?
+  pickupTime            DateTime?
+  deliveryAddressLine1  String?
+  deliveryAddressLine2  String?
+  deliveryCity          String?
+  deliveryState         String?
+  deliveryZip           String?
+  deliveryNotes         String?
+  deliveryLat           Float?
+  deliveryLng           Float?
+  deliveryDistanceMiles Float?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  items                 OrderItem[]
+  paymentEvents         PaymentEvent[]
+
+  @@index([status, createdAt])
+  @@index([fulfillmentType, createdAt])
+  @@index([userId, createdAt])
+  @@index([stripePaymentIntentId])
+}
+
+model OrderItem {
+  id                String             @id @default(cuid())
+  orderId           String
+  order             Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId        String?
+  menuItem          MenuItem?          @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
+  quantity          Int
+  itemName          String
+  basePriceCents    Int
+  lineTotalCents    Int
+  specialInstructions String?
+  modifiers         OrderItemModifier[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([orderId])
+  @@index([menuItemId])
+}
+
+model OrderItemModifier {
+  id                String    @id @default(cuid())
+  orderItemId       String
+  orderItem         OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  modifierGroupName String
+  optionName        String
+  priceDeltaCents   Int       @default(0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model PaymentEvent {
+  id              String   @id @default(cuid())
+  provider        String   @default("stripe")
+  eventId         String
+  eventType       String
+  orderId         String?
+  order           Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  paymentIntentId String?
+  payload         Json?
+  createdAt       DateTime @default(now())
+
+  @@index([orderId])
+  @@index([paymentIntentId])
+  @@index([createdAt])
+  @@unique([provider, eventId])
+}
