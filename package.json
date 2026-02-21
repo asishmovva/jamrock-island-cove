@@ -9,9 +9,13 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
+    "prisma:seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
+  },
+  "prisma": {
+    "seed": "pnpm prisma:seed"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -47,6 +51,7 @@
     "prisma": "6.19.1",
     "tailwindcss": "^3.4.14",
     "tailwindcss-animate": "^1.0.7",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   },
   "packageManager": "pnpm@10.26.0"

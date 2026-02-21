@@ -30,6 +30,7 @@ Copy `.env.example` to `.env.local` and fill Supabase, Stripe, Mapbox, and Resen
 - After `prisma db push`, run `supabase/sql/pr-db-3-rls-auth-sync.sql` in the Supabase SQL editor to enable RLS and auth user sync triggers.
 - SQL script usage notes are in `supabase/sql/README.md`.
 - Order creation currently runs through `POST /api/orders`, where totals are recomputed server-side before writes. RLS remains enabled for Supabase client access paths.
+- Load demo menu data with `pnpm prisma db seed`.
 
 ### Conventions
 
