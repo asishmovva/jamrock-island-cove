@@ -18,6 +18,9 @@ export function SiteHeader() {
             <Link className="transition hover:text-foreground" href="/menu">
               Menu
             </Link>
+            <Link className="transition hover:text-foreground" href="/cart">
+              Cart
+            </Link>
             <Link className="transition hover:text-foreground" href="/login">
               Login
             </Link>
@@ -26,7 +29,7 @@ export function SiteHeader() {
             </Link>
           </nav>
           <Button size="sm" asChild>
-            <Link href="#order">Order now</Link>
+            <Link href="/menu">Order now</Link>
           </Button>
         </div>
       </div>

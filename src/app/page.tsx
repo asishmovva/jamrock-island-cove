@@ -40,11 +40,11 @@ const highlights = [
 export default function Home() {
   return (
     <div className="space-y-16 pb-16">
-      <section className="relative overflow-hidden border-b border-primary/10 bg-gradient-to-br from-primary/12 via-background to-secondary/15">
+      <section className="from-primary/12 relative overflow-hidden border-b border-primary/10 bg-gradient-to-br via-background to-secondary/15">
         <div className="container grid gap-10 py-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-              Jamaican crafted · Fresh daily
+              Jamaican crafted - Fresh daily
             </div>
             <div className="space-y-3">
               <h1 className="text-4xl font-bold leading-tight text-foreground sm:text-5xl">
@@ -57,10 +57,10 @@ export default function Home() {
             </div>
             <div className="flex flex-wrap gap-3" id="order">
               <Button asChild size="lg">
-                <Link href="/order?mode=pickup">Order pickup</Link>
+                <Link href="/menu?fulfillment=pickup">Order pickup</Link>
               </Button>
               <Button asChild size="lg" variant="secondary">
-                <Link href="/order?mode=delivery">Order delivery</Link>
+                <Link href="/menu?fulfillment=delivery">Order delivery</Link>
               </Button>
               <Button asChild size="lg" variant="ghost">
                 <Link href="#about">View hours and location</Link>
