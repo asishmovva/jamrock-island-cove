@@ -91,6 +91,7 @@ export const menuItemSchema = z.object({
   basePriceCents: z.number().int().nonnegative(),
   imageUrl: z.string().nullable(),
   isPopular: z.boolean(),
+  isFeatured: z.boolean(),
   type: z.enum(menuItemTypeValues),
 });
 

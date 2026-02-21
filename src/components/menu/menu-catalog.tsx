@@ -138,7 +138,10 @@ export function MenuCatalog({ initialFulfillment }: MenuCatalogProps) {
                     <CardHeader className="space-y-2">
                       <div className="flex items-center justify-between gap-2">
                         <CardTitle className="text-lg">{item.name}</CardTitle>
-                        {item.isPopular ? <Badge variant="accent">Popular</Badge> : null}
+                        <div className="flex items-center gap-2">
+                          {item.isFeatured ? <Badge variant="secondary">Featured</Badge> : null}
+                          {item.isPopular ? <Badge variant="accent">Popular</Badge> : null}
+                        </div>
                       </div>
                       <CardDescription>
                         {item.description ?? "Island-fresh and made to order."}

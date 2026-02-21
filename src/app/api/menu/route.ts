@@ -14,9 +14,10 @@ export async function GET() {
       basePriceCents: true,
       imageUrl: true,
       isPopular: true,
+      isFeatured: true,
       type: true,
     },
-    orderBy: [{ isPopular: "desc" }, { type: "asc" }, { name: "asc" }],
+    orderBy: [{ isFeatured: "desc" }, { isPopular: "desc" }, { type: "asc" }, { name: "asc" }],
   });
 
   return NextResponse.json({ items });
