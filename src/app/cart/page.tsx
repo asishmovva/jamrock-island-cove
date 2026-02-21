@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 
 import { useCart } from "@/components/cart/cart-provider";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { formatUsd } from "@/lib/currency";
+import { menuItemTypeValues } from "@/lib/order-types";
 
 const tipOptions = [
   { label: "No tip", cents: 0 },
@@ -16,8 +20,57 @@ const tipOptions = [
   { label: "$10", cents: 1000 },
 ];
 
+const upsellItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  basePriceCents: z.number().int().nonnegative(),
+  imageUrl: z.string().nullable(),
+  type: z.enum(menuItemTypeValues),
+  isPopular: z.boolean(),
+  isFeatured: z.boolean(),
+  isStub: z.boolean(),
+});
+
+const upsellResponseSchema = z.object({
+  drinkSuggestions: z.array(upsellItemSchema),
+  dessertSuggestions: z.array(upsellItemSchema),
+});
+
+async function fetchUpsells(params: {
+  cartItemIds: string[];
+  cartTypes: (typeof menuItemTypeValues)[number][];
+}) {
+  const response = await fetch("/api/upsell", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(params),
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to load upsell suggestions.");
+  }
+
+  const data = (await response.json()) as unknown;
+  return upsellResponseSchema.parse(data);
+}
+
 export default function CartPage() {
   const cart = useCart();
+  const cartItemIds = useMemo(() => cart.items.map((item) => item.menuItemId), [cart.items]);
+  const cartTypes = useMemo(
+    () => Array.from(new Set(cart.items.map((item) => item.type))),
+    [cart.items],
+  );
+
+  const { data: upsells } = useQuery({
+    queryKey: ["upsells", cartItemIds.slice().sort().join(","), cartTypes.slice().sort().join(",")],
+    queryFn: () => fetchUpsells({ cartItemIds, cartTypes }),
+    enabled: cart.items.length > 0,
+  });
+
+  const hasUpsells =
+    (upsells?.drinkSuggestions.length ?? 0) > 0 || (upsells?.dessertSuggestions.length ?? 0) > 0;
 
   return (
     <section className="container space-y-6 py-10">
@@ -110,6 +163,93 @@ export default function CartPage() {
                   </div>
                 </div>
               ))}
+
+              {hasUpsells ? (
+                <div className="space-y-4 rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">You might also like</p>
+                    <p className="text-xs text-muted-foreground">
+                      One-click add suggestions based on what is missing in your cart.
+                    </p>
+                  </div>
+
+                  {upsells?.drinkSuggestions.length ? (
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Add a drink
+                      </p>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {upsells.drinkSuggestions.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-center justify-between gap-2 rounded-lg border border-border/70 bg-card/80 p-3"
+                          >
+                            <div>
+                              <p className="text-sm font-medium text-foreground">{item.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatUsd(item.basePriceCents)}
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                cart.addItem({
+                                  menuItemId: item.id,
+                                  name: item.name,
+                                  priceCents: item.basePriceCents,
+                                  imageUrl: item.imageUrl,
+                                  type: item.type,
+                                  specialInstructions: "",
+                                })
+                              }
+                            >
+                              Add
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {upsells?.dessertSuggestions.length ? (
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Add a dessert
+                      </p>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {upsells.dessertSuggestions.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-center justify-between gap-2 rounded-lg border border-border/70 bg-card/80 p-3"
+                          >
+                            <div>
+                              <p className="text-sm font-medium text-foreground">{item.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatUsd(item.basePriceCents)}
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                cart.addItem({
+                                  menuItemId: item.id,
+                                  name: item.name,
+                                  priceCents: item.basePriceCents,
+                                  imageUrl: item.imageUrl,
+                                  type: item.type,
+                                  specialInstructions: "",
+                                })
+                              }
+                            >
+                              Add
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </CardContent>
           </Card>
 

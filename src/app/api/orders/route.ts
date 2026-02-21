@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { getStubMenuItemById } from "@/lib/menu-stubs";
 import { calculateOrderTotals } from "@/lib/order-pricing";
 import { prisma } from "@/lib/prisma";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
@@ -10,6 +11,15 @@ export const runtime = "nodejs";
 type SessionUser = {
   userId: string | null;
   isAdmin: boolean;
+};
+
+type ResolvedOrderItem = {
+  menuItemId: string | null;
+  itemName: string;
+  basePriceCents: number;
+  quantity: number;
+  lineTotalCents: number;
+  specialInstructions: string | null;
 };
 
 async function getSessionUser(): Promise<SessionUser> {
@@ -49,8 +59,10 @@ export async function POST(request: Request) {
     const { userId, isAdmin } = await getSessionUser();
 
     const menuItemIds = Array.from(new Set(payload.items.map((item) => item.menuItemId)));
+    const dbMenuItemIds = menuItemIds.filter((id) => !getStubMenuItemById(id));
+
     const menuItems = await prisma.menuItem.findMany({
-      where: { id: { in: menuItemIds }, isActive: true },
+      where: { id: { in: dbMenuItemIds }, isActive: true },
       select: {
         id: true,
         name: true,
@@ -59,7 +71,7 @@ export async function POST(request: Request) {
       },
     });
 
-    if (menuItems.length !== menuItemIds.length) {
+    if (menuItems.length !== dbMenuItemIds.length) {
       return NextResponse.json(
         {
           error: "One or more menu items are unavailable.",
@@ -69,22 +81,25 @@ export async function POST(request: Request) {
     }
 
     const menuItemMap = new Map(menuItems.map((item) => [item.id, item]));
-    const orderItems = payload.items.map((item) => {
+    const orderItems: ResolvedOrderItem[] = payload.items.map((item) => {
       const menuItem = menuItemMap.get(item.menuItemId);
+      const stubItem = getStubMenuItemById(item.menuItemId);
 
-      if (!menuItem) {
+      if (!menuItem && !stubItem) {
         throw new Error(`Missing menu item ${item.menuItemId}`);
       }
-      if (menuItem.stockQty !== null && item.qty > menuItem.stockQty) {
+      if (menuItem && menuItem.stockQty !== null && item.qty > menuItem.stockQty) {
         throw new Error(`Insufficient stock for ${menuItem.name}`);
       }
+      const resolvedName = menuItem?.name ?? stubItem?.name ?? "Unavailable item";
+      const resolvedBasePriceCents = menuItem?.basePriceCents ?? stubItem?.basePriceCents ?? 0;
 
       return {
-        menuItemId: menuItem.id,
-        itemName: menuItem.name,
-        basePriceCents: menuItem.basePriceCents,
+        menuItemId: menuItem?.id ?? null,
+        itemName: resolvedName,
+        basePriceCents: resolvedBasePriceCents,
         quantity: item.qty,
-        lineTotalCents: menuItem.basePriceCents * item.qty,
+        lineTotalCents: resolvedBasePriceCents * item.qty,
         specialInstructions: item.specialInstructions?.trim() || null,
       };
     });
